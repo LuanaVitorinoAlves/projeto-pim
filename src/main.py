@@ -3,18 +3,34 @@ import hashlib
 import statistics
 import os
 
-USERS_FILE = "usuarios.json"
-COURSES_FILE = "cursos.json"
+from crypto import load_key, encrypt_data, decrypt_data
 
+DATA_DIR = "data"
+USERS_FILE = os.path.join(DATA_DIR, "usuarios.json")
+COURSES_FILE = os.path.join(DATA_DIR, "cursos.json")
+key = load_key()
+
+# === Função para garantir a criação da pasta ===
+def ensure_data_directory():
+    if not os.path.exists(DATA_DIR):
+        os.makedirs(DATA_DIR)
+
+# === Leitura com Descriptografia ===
 def load_data(file):
+    ensure_data_directory()
     if not os.path.exists(file):
         return []
     with open(file, 'r') as f:
-        return json.load(f)
+        encrypted_data = f.read()
+        decrypted_data = decrypt_data(encrypted_data, key)
+        return json.loads(decrypted_data)
 
 def save_data(file, data):
+    ensure_data_directory()
     with open(file, 'w') as f:
-        json.dump(data, f, indent=4)
+        json_data = json.dumps(data, indent=4)
+        encrypted_data = encrypt_data(json_data, key)
+        f.write(encrypted_data)
 
 def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
@@ -69,7 +85,8 @@ def exibir_desempenho(usuario):
     if not usuario["notas"]:
         print("Sem notas registradas.")
         return
-    notas = usuario["notas"]
+    notas: list[float] = usuario["notas"]
+    print(f"Notas: {', '.join(map(str, notas))}")
     print(f"Média: {statistics.mean(notas):.2f}")
     print(f"Moda: {statistics.mode(notas):.2f}")
     print(f"Mediana: {statistics.median(notas):.2f}")
