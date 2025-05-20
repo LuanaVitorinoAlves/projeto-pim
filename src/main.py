@@ -37,10 +37,23 @@ def hash_password(password):
 
 def register_user():
     print("\n=== Cadastro de Usuário ===")
+
+    print("\nPolítica de Privacidade:")
+    print("Este sistema armazena seus dados localmente apenas para fins educacionais.")
+    print("Nenhuma informação será compartilhada com terceiros.")
+    print("Você pode solicitar a exclusão de seus dados a qualquer momento.")
+
+    aceite = input("Você aceita os termos da política de privacidade? (S/N): ").strip().lower()
+    if aceite != 's':
+        print("Cadastro cancelado. É necessário aceitar a política de privacidade.")
+        return
+
     nome = input("Nome: ")
     idade = int(input("Idade: "))
     email = input("Email: ")
     senha = input("Senha: ")
+    pergunta = input("Digite uma pergunta de segurança (ex: Nome da sua mãe?): ")
+    resposta = input("Resposta: ")
     
     usuario = {
         "id": len(usuarios) + 1,
@@ -48,12 +61,34 @@ def register_user():
         "idade": idade,
         "email": email,
         "senha": hash_password(senha),
-        "notas": []
+        "pergunta": pergunta,
+        "resposta": hash_password(resposta.lower().strip()),
+        "notas": [],
+        "aceite_politica": True
     }
     
     usuarios.append(usuario)
     save_data(USERS_FILE, usuarios)
     print("Usuário cadastrado com sucesso!\n")
+
+def recuperar_senha():
+    print("\n=== Recuperação de Senha ===")
+    email = input("Email: ")
+    for usuario in usuarios:
+        if usuario["email"] == email:
+            print(f"Pergunta de segurança:\n -- {usuario['pergunta']}")
+            resposta = input("Resposta: ").lower().strip()
+            if hash_password(resposta) == usuario["resposta"]:
+                nova_senha = input("Digite a nova senha: ")
+                usuario["senha"] = hash_password(nova_senha)
+                save_data(USERS_FILE, usuarios)
+                print("Senha atualizada com sucesso!")
+                return
+            else:
+                print("Resposta incorreta.")
+                return
+    print("Email não encontrado.")
+
 
 def login():
     print("\n=== Login ===")
@@ -95,7 +130,8 @@ def menu_principal():
     while True:
         print("\n1. Cadastrar Usuário")
         print("2. Login")
-        print("3. Sair")
+        print("3. Recuperar Senha")
+        print("4. Sair")
         op = input("Escolha uma opção: ")
 
         if op == "1":
@@ -105,6 +141,8 @@ def menu_principal():
             if usuario:
                 menu_usuario(usuario)
         elif op == "3":
+            recuperar_senha()
+        elif op == "4":
             print("Saindo...")
             break
         else:

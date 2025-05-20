@@ -1,5 +1,13 @@
 #!/bin/bash
+
+echo "Criando ambiente Python..."
 python3 -m venv venv
+echo "Criado com sucesso"
+
+echo "Ativando ambiente Python..."
 source venv/bin/activate
+echo "Ativado com sucesso"
+
+echo "Instalando bibliotecas..."
 pip install -r requirements.txt
-echo "Ambiente configurado com sucesso!"
+echo "Configurado com sucesso!"

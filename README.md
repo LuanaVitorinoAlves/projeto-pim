@@ -8,15 +8,20 @@ ADS UNIP 2025
    cd projeto_pim
    ```
 2. Execute o script de configuração:
-- Linux/macOS:
-  ```shell
-  ./setup.sh
-  ```
-- Windows:
-  ```shell
-  setup.bat
-  ```
+   - Linux/macOS:
+     ```shell
+     ./setup
+     ```
+   - Windows:
+     ```shell
+     setup.bat
+     ```
 3. Execute o programa:
-   ```shell
-   python src/main.py
-   ```
+   - Linux/macOS:
+     ```shell
+     ./pim
+     ```
+   - Windows:
+     ```shell
+     pim.bat
+     ```
