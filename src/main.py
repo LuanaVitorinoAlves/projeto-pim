@@ -35,8 +35,11 @@ def save_data(file, data):
 def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
 
-def register_user():
-    print("\n=== Cadastro de Usuário ===")
+def register_user(admin=False):
+    admin_str = 'ADMIN ' if admin else ''
+    print(f"\n=== Cadastro de Usuário ===")
+    if admin:
+        print("USUÁRIO ADMINISTRADOR")
 
     print("\nPolítica de Privacidade:")
     print("Este sistema armazena seus dados localmente apenas para fins educacionais.")
@@ -48,12 +51,12 @@ def register_user():
         print("Cadastro cancelado. É necessário aceitar a política de privacidade.")
         return
 
-    nome = input("Nome: ")
-    idade = int(input("Idade: "))
-    email = input("Email: ")
-    senha = input("Senha: ")
-    pergunta = input("Digite uma pergunta de segurança (ex: Nome da sua mãe?): ")
-    resposta = input("Resposta: ")
+    nome = input(f"{admin_str}Nome: ")
+    idade = int(input(f"{admin_str}Idade: "))
+    email = input(f"{admin_str}Email: ")
+    senha = input(f"{admin_str}Senha: ")
+    pergunta = input(f"Digite uma pergunta de segurança (ex: Nome da sua mãe?): ")
+    resposta = input(f"Resposta: ")
     
     usuario = {
         "id": len(usuarios) + 1,
@@ -64,7 +67,8 @@ def register_user():
         "pergunta": pergunta,
         "resposta": hash_password(resposta.lower().strip()),
         "notas": [],
-        "aceite_politica": True
+        "aceite_politica": True,
+        "admin": admin
     }
     
     usuarios.append(usuario)
@@ -139,7 +143,10 @@ def menu_principal():
         elif op == "2":
             usuario = login()
             if usuario:
-                menu_usuario(usuario)
+                if usuario.get("admin"):
+                    menu_admin(usuario)
+                else:
+                    menu_usuario(usuario)
         elif op == "3":
             recuperar_senha()
         elif op == "4":
@@ -165,6 +172,75 @@ def menu_usuario(usuario):
         else:
             print("Opção inválida.")
 
+def menu_admin(usuario):
+    while True:
+        print(f"\nBem-vindo(a) ADMIN, {usuario['nome']}")
+        print("1. Ver Estatísticas da Plataforma")
+        print("2. Logout")
+        op = input("Escolha uma opção: ")
+
+        if op == "1":
+            mostrar_estatisticas_globais()
+        elif op == "2":
+            break
+        else:
+            print("Opção inválida.")
+
+def mostrar_estatisticas_globais():
+    print("\n=== Estatísticas da Plataforma ===")
+    if not usuarios:
+        print("Nenhum dado para exibir.")
+        return
+
+    idades = [u["idade"] for u in usuarios]
+    todas_notas = [nota for u in usuarios for nota in u["notas"]]
+
+    print(f"Usuários cadastrados: {len(usuarios)}")
+    print(f"Idade média: {statistics.mean(idades):.1f}")
+
+    faixa_etaria = {"0-17": 0, "18-25": 0, "26-40": 0, "41+": 0}
+    for idade in idades:
+        if idade <= 17:
+            faixa_etaria["0-17"] += 1
+        elif idade <= 25:
+            faixa_etaria["18-25"] += 1
+        elif idade <= 40:
+            faixa_etaria["26-40"] += 1
+        else:
+            faixa_etaria["41+"] += 1
+    print("Distribuição por faixa etária:")
+    for faixa, total in faixa_etaria.items():
+        print(f"  {faixa}: {total} usuário(s)")
+
+    if todas_notas:
+        print(f"\nTotal de notas registradas: {len(todas_notas)}")
+        print(f"Média geral das notas: {statistics.mean(todas_notas):.2f}")
+        print(f"Mediana das notas: {statistics.median(todas_notas):.2f}")
+        try:
+            print(f"Moda das notas: {statistics.mode(todas_notas):.2f}")
+        except statistics.StatisticsError:
+            print("Moda das notas: Sem valor único dominante.")
+
+        # Histograma textual
+        print("\nHistograma de notas:")
+        faixas = {"0-4": 0, "5-6": 0, "7-8": 0, "9-10": 0}
+        for nota in todas_notas:
+            if nota < 5:
+                faixas["0-4"] += 1
+            elif nota <= 6:
+                faixas["5-6"] += 1
+            elif nota <= 8:
+                faixas["7-8"] += 1
+            else:
+                faixas["9-10"] += 1
+        for faixa, contagem in faixas.items():
+            print(f"  {faixa}: {'*' * contagem}")
+    else:
+        print("Nenhuma nota registrada ainda.")
+
 # Execução
 usuarios = load_data(USERS_FILE)
+if not usuarios:
+    print("Nenhum usuário encontrado. Cadastro inicial obrigatório (admin).")
+    register_user(admin=True)
 menu_principal()
