@@ -1,6 +1,7 @@
 import json
 import hashlib
 import statistics
+import re
 import os
 
 from crypto import load_key, encrypt_data, decrypt_data
@@ -176,12 +177,15 @@ def menu_admin(usuario):
     while True:
         print(f"\nBem-vindo(a) ADMIN, {usuario['nome']}")
         print("1. Ver Estatísticas da Plataforma")
-        print("2. Logout")
+        print("2. Buscar Usuário por ID ou Email")
+        print("3. Logout")
         op = input("Escolha uma opção: ")
 
         if op == "1":
             mostrar_estatisticas_globais()
         elif op == "2":
+            buscar_usuario()
+        elif op == "3":
             break
         else:
             print("Opção inválida.")
@@ -237,6 +241,29 @@ def mostrar_estatisticas_globais():
             print(f"  {faixa}: {'*' * contagem}")
     else:
         print("Nenhuma nota registrada ainda.")
+
+def buscar_usuario():
+    print("\n=== Buscar Usuário ===")
+    termo = input("Digite o ID ou Email do usuário: ").strip()
+
+    if re.match(r"^\d+$", termo):  # Apenas dígitos → ID
+        user = next((u for u in usuarios if str(u["id"]) == termo), None)
+    elif re.match(r"^\w+@\w+\.\w+$", termo):  # Formato de email simples
+        user = next((u for u in usuarios if u["email"] == termo), None)
+    else:
+        print("Formato inválido. Use um ID numérico ou um email válido.")
+        return
+
+    if user:
+        print("\nUsuário encontrado:")
+        print(f"ID: {user['id']}")
+        print(f"Nome: {user['nome']}")
+        print(f"Idade: {user['idade']}")
+        print(f"Email: {user['email']}")
+        print(f"Notas: {user['notas']}")
+        print(f"Admin: {'Sim' if user.get('admin') else 'Não'}")
+    else:
+        print("Usuário não encontrado.")
 
 # Execução
 usuarios = load_data(USERS_FILE)
