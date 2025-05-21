@@ -6,6 +6,6 @@ echo Ativando ambiente python...
 call venv\Scripts\activate
 echo Ativado com sucesso
 echo Instalando bibliotecas...
-pip install -r requirements.txt
+python -m pip install -r requirements.txt
 echo Configurado com sucesso!
 pause

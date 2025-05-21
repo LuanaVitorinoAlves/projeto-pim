@@ -14,7 +14,7 @@ ADS UNIP 2025
      ```
    - Windows:
      ```shell
-     setup.bat
+     .\setup.bat
      ```
 3. Execute o programa:
    - Linux/macOS:
@@ -23,5 +23,5 @@ ADS UNIP 2025
      ```
    - Windows:
      ```shell
-     pim.bat
+     .\pim.bat
      ```
